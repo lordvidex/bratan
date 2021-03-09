@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "22692048460",
+    "project_id": "bratan-482be",
+    "storage_bucket": "bratan-482be.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:22692048460:android:24986c75ebbbadbd8acee9",
+        "android_client_info": {
+          "package_name": "com.example.bratan"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "22692048460-h681grd9oevg7d4cgtbkkd124s7ogb7m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBmD8Bf29-HEVi0KB4wQV9AzyEjGBP9Ojw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "22692048460-h681grd9oevg7d4cgtbkkd124s7ogb7m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
