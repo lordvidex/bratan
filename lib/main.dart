@@ -1,7 +1,6 @@
 import 'dart:io';
-
+import 'package:google_mobile_ads/google_mobile_ads.dart';
 import 'package:bratan/ad_manager.dart';
-import 'package:firebase_admob/firebase_admob.dart';
 import 'package:flutter/material.dart';
 
 int times = 0;
@@ -12,7 +11,7 @@ void main() async {
 }
 
 Future<void> initAdMob() {
-  return FirebaseAdMob.instance.initialize(appId: AdManager.appId);
+  return MobileAds.instance.initialize();
 }
 
 class MyApp extends StatelessWidget {
@@ -44,15 +43,28 @@ class _HomePageState extends State<HomePage> {
   bool _isInterstitialAdReady;
   @override
   void initState() {
-    _bannerAd =
-        BannerAd(adUnitId: AdManager.bannerAdUnitId, size: AdSize.banner);
+    _bannerAd = BannerAd(
+        adUnitId: AdManager.bannerAdUnitId,
+        size: AdSize.banner,
+        listener: AdListener(),
+        request: AdRequest());
     _isInterstitialAdReady = false;
     _interstitialAd = InterstitialAd(
+        request: AdRequest(),
         adUnitId: AdManager.interstitialAdUnitId,
-        listener: _onInterstitalAdEvent);
+        listener: AdListener(
+            onAdLoaded: (_) => _isInterstitialAdReady = true,
+            onAdClosed: (_) {
+              if (_isInterstitialAdReady) {
+                _isInterstitialAdReady = false;
+                times++;
+              }
+              _moveToSecond();
+            }));
     super.initState();
 
     loadBannerAd();
+    loadInterstitialAd();
   }
 
   @override
@@ -62,41 +74,43 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void _onInterstitalAdEvent(MobileAdEvent event) {
-    switch (event) {
-      case MobileAdEvent.loaded:
-        _isInterstitialAdReady = true;
-        break;
-      case MobileAdEvent.failedToLoad:
-        _isInterstitialAdReady = false;
-        print('Failed to load an interstitial ad');
-        break;
-      case MobileAdEvent.closed:
-        if (_isInterstitialAdReady) times++;
-        _isInterstitialAdReady = false;
-        _moveToSecond();
-        break;
-      default:
-      // do nothing
-    }
-  }
+  // void _onInterstitalAdEvent(MobileAdEvent event) {
+  //   switch (event) {
+  //     case MobileAdEvent.loaded:
+  //       _isInterstitialAdReady = true;
+  //       break;
+  //     case MobileAdEvent.failedToLoad:
+  //       _isInterstitialAdReady = false;
+  //       print('Failed to load an interstitial ad');
+  //       break;
+  //     case MobileAdEvent.closed:
+  //       if (_isInterstitialAdReady) times++;
+  //       _isInterstitialAdReady = false;
+  //       _moveToSecond();
+  //       break;
+  //     default:
+  //     // do nothing
+  //   }
+  // }
 
   void _moveToSecond() {
     Navigator.of(context).pushReplacementNamed(SecondPage.routeName);
   }
 
-  void loadInterstitialAd() {
-    _interstitialAd.load();
+  void loadInterstitialAd() async {
+    await _interstitialAd.load();
   }
 
-  void loadBannerAd() {
-    _bannerAd
-      ..load()
-      ..show(anchorType: AnchorType.bottom);
+  void loadBannerAd() async {
+    await _bannerAd.load();
+    // ..show(anchorType: AnchorType.bottom);
   }
 
   @override
   Widget build(BuildContext context) {
+    final adBanner = AdWidget(
+      ad: _bannerAd,
+    );
     return Scaffold(
         appBar: AppBar(title: Text('My Counter')),
         body: Padding(
@@ -104,8 +118,13 @@ class _HomePageState extends State<HomePage> {
           child: Column(children: [
             Text('Welcome to my APp!', style: TextStyle(fontSize: 30)),
             ElevatedButton(
-                onPressed: () => loadInterstitialAd(),
-                child: Text('Show Big Ad', style: TextStyle(fontSize: 25)))
+                onPressed: () => _interstitialAd.show(),
+                child: Text('Show Big Ad', style: TextStyle(fontSize: 25))),
+            Spacer(),
+            Container(
+                child: adBanner,
+                width: _bannerAd.size.width.toDouble(),
+                height: _bannerAd.size.height.toDouble())
           ]),
         ));
   }
